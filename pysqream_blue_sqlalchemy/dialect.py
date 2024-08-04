@@ -25,6 +25,7 @@ for row in res:
     print row
 
 '''
+from sqlalchemy import exc
 # from __future__ import annotations
 # from importlib import import_module, resources    # for importing and returning the module
 from sqlalchemy.engine.default import DefaultDialect, DefaultExecutionContext
@@ -247,17 +248,20 @@ class SqreamBlueDialect(DefaultDialect):
     def get_table_names(self, connection, schema=None, **kw):
         ''' Allows showing table names when connecting database to Apache Superset'''
 
-        query = "select * from sqream_catalog.tables"
-        tables = connection.execute(query).fetchall()
-        query = "select * from sqream_catalog.external_tables"
-        external_tables = connection.execute(query).fetchall()
-        return [table_spec[3] for table_spec in tables + external_tables]
+        describeTablesQuery = "describe tables"
+        tables = connection.execute(describeTablesQuery).fetchall()
+        #query = "select * from sqream_catalog.tables"
+        #tables = connection.execute(query).fetchall()
+        #query = "select * from sqream_catalog.external_tables"
+        #external_tables = connection.execute(query).fetchall()
+        return [table_spec[2] for table_spec in tables]
 
     def get_schema_names(self, connection, schema=None, **kw):
         ''' Return schema names '''
 
-        query = "select get_schemas()"
-        return [schema for schema, database in connection.execute(query).fetchall()]
+        #query = "select get_schemas()"
+        query = "describe schemas"
+        return [schema[1] for schema, database in connection.execute(query).fetchall()]
 
     def get_view_names(self, connection, schema='public', **kw):
         
@@ -271,7 +275,7 @@ class SqreamBlueDialect(DefaultDialect):
         ''' Used by SQLAlchemy's Table() which is called by Superset's get_table()
             when trying to add a new table to the sources'''
 
-        query = f'select get_ddl(\'"{table_name}"\')'
+        query = f'select get_ddl(table_name)'
         res = connection.execute(query).fetchall()
         table_ddl = ''.join(tup[0] for tup in res).splitlines()
 

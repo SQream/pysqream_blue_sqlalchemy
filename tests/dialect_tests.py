@@ -32,7 +32,9 @@ class TestSqlalchemy(TestBase):
 
         Logger().info('SQLAlchemy direct query tests')
         manual_conn_str = f"sqream_blue://{self.domain}:443/master"
+        #manual_conn_str = f"sqream_blue://dev5-sqream.isqream.com:443/master"
         connect_args = {'access_token': _access_token}
+
         engine2 = create_engine(manual_conn_str, connect_args=connect_args)
         res = engine2.execute('select 1')
         res.fetchall()
